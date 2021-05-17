@@ -11,7 +11,7 @@ module.exports = (app) => {
     console.log(dbnotes);
     console.log(req.params.id);
     const note = dbnotes.find( n => n.id === parseInt(req.params.id));
-    if (!note) res.status(404).send('This note with the given ID is not found');
+    if (!note) return res.status(404).send('This note with the given ID is not found');
     res.send(note);
   });
 
@@ -21,14 +21,18 @@ module.exports = (app) => {
       if(req.body.title == dbnotes[i].title && req.body.text == dbnotes[i].text){ return };
     }
     // Add id property to the new note
-    req.body.id = dbnotes.length + 1;  
+    req.body.id = dbnotes.length;  
     dbnotes.push(req.body);
     res.json(dbnotes);
   });
 
-
-  // app.delet('/api/notes', (req, res) => {
-  //   dbnotes.push(req.body);
-  //   res.json(dbnotes);
-  // });
+  app.delete('/api/notes/:id', (req, res) => {
+    const note = dbnotes.find( n => n.id === parseInt(req.params.id));
+    if (!note) return res.status(404).send('This note with the given ID is not found');
+    const index = dbnotes.indexOf(note);
+    dbnotes.splice(index, 1);
+    // To revise note ids after note delete request
+    for (let i = index; i < dbnotes.length; i++ ){dbnotes[i].id--}
+    res.json(dbnotes);
+  });
 };
